@@ -436,7 +436,39 @@ class Network(object):
 
             return rois_P2, rois_P3, rois_P4, rois_P5, rois_P6, labels, bbox_targets, bbox_inside_weights, bbox_outside_weights, rois
 
+    @layer
+    def proposal_target_layer_HOI(self, input, name):
+        if isinstance(input[0], tuple):
+            input[0] = input[0][0]
+            with tf.variable_scope(name) as scope:
+                rois = input[0].reshape(-1, 5)
+                
+                def calc_level(width, height):
+                    return min(5, max(2, int(4 + np.log2(np.sqrt(width * height) / 224))))
 
+                level = lambda roi : calc_level(roi[3] - roi[1], roi[4] - roi[2])   # roi: [0, x0, y0, x1, y1]
+                leveled_rois = [None] * 5
+                leveled_idxs = [[], [], [], [], []]
+                for idx, roi in enumerate(rois):
+                    level_idx = level(roi) - 2
+                    leveled_idxs[level_idx].append(idx)
+                    
+                for level_idx in xrange(0, 5):
+                     leveled_rois[level_idx] = rois[leveled_idxs[level_idx]]
+                
+                rois_P2 = tf.reshape(leveled_rois[0], [-1, 5], name='rois_P2') # goes to roi_pooling
+                rois_P3 = tf.reshape(leveled_rois[1], [-1, 5], name='rois_P3') # goes to roi_pooling
+                rois_P4 = tf.reshape(leveled_rois[2], [-1, 5], name='rois_P4') # goes to roi_pooling
+                rois_P5 = tf.reshape(leveled_rois[3], [-1, 5], name='rois_P5') # goes to roi_pooling
+                rois_P6 = tf.reshape(leveled_rois[4], [-1, 5], name='rois_P6') # goes to roi_pooling
+
+                return rois_P2, rois_P3, rois_P4, rois_P5, rois_P6
+        
+        
+        
+        
+        
+        
     '''
     @layer
     def reshape_layer(self, input, d, name):

@@ -482,6 +482,10 @@ class Network(object):
         return tf.concat(axis=axis, values=inputs, name=name)
 
     @layer
+    def flatten(self, inputs, name):
+        return tf.flatten(values=inputs, name=name)
+    
+    @layer
     def fc(self, input, num_out, name, relu=True, trainable=True):
         with tf.variable_scope(name) as scope:
             # only use the first input

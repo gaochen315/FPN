@@ -483,7 +483,7 @@ class Network(object):
 
     @layer
     def flatten(self, inputs, name):
-        return tf.flatten(values=inputs, name=name)
+        return tf.layers.flatten(values=inputs, name=name)
     
     @layer
     def fc(self, input, num_out, name, relu=True, trainable=True):
